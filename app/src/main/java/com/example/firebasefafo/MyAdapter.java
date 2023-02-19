@@ -8,12 +8,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
-
-import java.text.BreakIterator;
+import java.net.URLConnection;
 import java.util.ArrayList;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
@@ -40,7 +39,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.items, parent, false);
+        View view = LayoutInflater.from(this.context).inflate(R.layout.items, parent, false);
         return new ViewHolder(view);
     }
 
@@ -58,18 +57,39 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
     public class ViewHolder extends RecyclerView.ViewHolder {
         public TextView nameOFFile;
 
+        @SuppressLint({"IntentReset", "QueryPermissionsNeeded"})
         public ViewHolder(View itemView) {
             super(itemView);
             nameOFFile = itemView.findViewById(R.id.nameOfFile);
             itemView.setOnClickListener(view -> {
                 int position = recyclerView.getChildLayoutPosition(view);
-                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>> position " + position);
-                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>> urls " + urls);
-                Intent intent = new Intent();
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.setDataAndType(Uri.parse(urls.get(position)), Intent.ACTION_VIEW);
-                context.startActivity(intent);
+//                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>> position " + position);
+//                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>> urls " + urls);
+//                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>> context " + context);
+//                Intent intent = new Intent(Intent.ACTION_VIEW);
+//                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+//                Uri uri = Uri.parse(urls.get(position));
+//                String mimeType = URLConnection.guessContentTypeFromName(uri.toString());
+//                intent.setDataAndType(uri, mimeType);
+//                context.startActivity(intent);
+//                Intent intent = new Intent();
+//                String googleUrl = "https://www.google.com";
+//                Uri uri = Uri.parse(googleUrl);
+//                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>> url " + Uri.parse(urls.get(position)).toString());
+//                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>> url " + uri);
+//                intent.resolveActivity(context.getPackageManager());
+//                intent.setData(uri);
+//                intent.setType(Intent.ACTION_VIEW);
+//                context.startActivity(intent);
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(urls.get(position)));
+                if (intent.resolveActivity(context.getPackageManager()) != null) {
+                    context.startActivity(intent);
+                } else {
+                    Toast.makeText(context,"No app avaialbe to handle this request", Toast.LENGTH_SHORT).show();
+                }
             });
         }
     }
 }
+
+

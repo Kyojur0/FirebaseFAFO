@@ -8,11 +8,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.auth.api.signin.internal.Storage;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -33,7 +36,7 @@ public class MyRecyclerViewActivity extends AppCompatActivity {
                 String url = snapshot.getValue(String.class); // return the url for `fileName`
                 System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>MyRecyclerView fileName " + fileName);
                 System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>MyRecyclerView url " + url);
-                ((MyAdapter) Objects.requireNonNull(recyclerView.getAdapter())).update(fileName, url);
+                ((MyAdapter)recyclerView.getAdapter()).update(fileName, url);
 
             }
 

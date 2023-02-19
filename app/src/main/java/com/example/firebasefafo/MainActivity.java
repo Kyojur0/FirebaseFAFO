@@ -14,14 +14,18 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.util.Objects;
 
@@ -81,20 +85,44 @@ public class MainActivity extends AppCompatActivity {
         System.out.println(">>>>>>>>>>>>>>>>>>> fileName " + fileName);
         System.out.println(">>>>>>>>>>>>>>>>>>> pdfUri " + pdfUri);
         StorageReference storageReference = storage.getReference(); // returns root path
-        storageReference.child("Uploads").child(fileName).putFile(pdfUri).addOnSuccessListener(taskSnapshot -> {
-            String url = taskSnapshot.getMetadata().getReference().getDownloadUrl().toString(); // return the url for your uploaded file
-            System.out.println(">>>>>>>>>>>>>>>>>>> url " + url);
-            // save this url in realtime database
-            DatabaseReference reference = database.getReference(); // return the path to root
-            reference.child(fileName).setValue(url).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    Toast.makeText(MainActivity.this, "File uploaded successfully", Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(MainActivity.this, "File not successfully uploaded", Toast.LENGTH_LONG).show();
-                }
-            });
-        }).addOnProgressListener(snapshot -> { progressDialog.setProgress((int) (100*snapshot.getBytesTransferred()/snapshot.getTotalByteCount()));
-        }).addOnFailureListener(e -> Toast.makeText(MainActivity.this, "File not uploaded", Toast.LENGTH_LONG).show());
+        storageReference.child("Uploads").child(fileName).putFile(pdfUri)
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        Task<Uri> result = taskSnapshot.getStorage().getDownloadUrl();
+                        result.addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                String imageUrl = uri.toString();
+                                Toast.makeText(MainActivity.this, imageUrl, Toast.LENGTH_SHORT).show();
+                                Log.d(">>>> TAG:", imageUrl);
+                                DatabaseReference reference = database.getReference(); // return the path to root
+                                reference.child(fileName).setValue(imageUrl).addOnCompleteListener(task -> {
+                                    if (task.isSuccessful()) {
+                                        Toast.makeText(MainActivity.this, "File uploaded successfully", Toast.LENGTH_LONG).show();
+                                    } else {
+                                        Toast.makeText(MainActivity.this, "File not successfully uploaded", Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                            }
+                        });
+
+                    }
+                });
+//                .addOnSuccessListener(taskSnapshot -> {
+//            String url = taskSnapshot.getMetadata().getReference().getDownloadUrl().toString(); // return the url for your uploaded file
+//            System.out.println(">>>>>>>>>>>>>>>>>>> url " + url);
+//            // save this url in realtime database
+//            DatabaseReference reference = database.getReference(); // return the path to root
+//            reference.child(fileName).setValue(url).addOnCompleteListener(task -> {
+//                if (task.isSuccessful()) {
+//                    Toast.makeText(MainActivity.this, "File uploaded successfully", Toast.LENGTH_LONG).show();
+//                } else {
+//                    Toast.makeText(MainActivity.this, "File not successfully uploaded", Toast.LENGTH_LONG).show();
+//                }
+//            });
+//        }).addOnProgressListener(snapshot -> { progressDialog.setProgress((int) (100*snapshot.getBytesTransferred()/snapshot.getTotalByteCount()));
+//        }).addOnFailureListener(e -> Toast.makeText(MainActivity.this, "File not uploaded", Toast.LENGTH_LONG).show());
 
     }
 
